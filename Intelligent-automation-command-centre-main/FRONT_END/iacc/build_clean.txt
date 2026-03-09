@@ -1,0 +1,26 @@
+﻿vite v7.3.1 building client environment for production...
+transforming...
+âœ“ 2542 modules transformed.
+âœ— Build failed in 8.63s
+error during build:
+../../../../../../../../../C:/Users/snhyo/Downloads/new projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/src/pages/education/HeadmasterDashboard.jsx (9:4): "HM_SCHOOL" is not exported by "../../../../../../../../../C:/Users/snhyo/Downloads/new projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/src/data/educationData.js", imported by "../../../../../../../../../C:/Users/snhyo/Downloads/new projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/src/pages/education/HeadmasterDashboard.jsx".
+file: C:/Users/snhyo/Downloads/new projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/src/pages/education/HeadmasterDashboard.jsx:9:4
+
+ 7: } from 'lucide-react';
+ 8: import {
+ 9:     HM_SCHOOL, HEADMASTERS, CLASS_STRUCTURE, generateStudents
+        ^
+10: } from '../../data/educationData';
+11: import { useEducationStore } from '../../data/educationStore';
+
+    at getRollupError (file:///c:/Users/snhyo/Downloads/new%20projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/node_modules/rollup/dist/es/shared/parseAst.js:402:41)
+    at error (file:///c:/Users/snhyo/Downloads/new%20projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/node_modules/rollup/dist/es/shared/parseAst.js:398:42)
+    at Module.error (file:///c:/Users/snhyo/Downloads/new%20projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/node_modules/rollup/dist/es/shared/node-entry.js:17040:16)
+    at Module.traceVariable (file:///c:/Users/snhyo/Downloads/new%20projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/node_modules/rollup/dist/es/shared/node-entry.js:17452:29)
+    at ModuleScope.findVariable (file:///c:/Users/snhyo/Downloads/new%20projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/node_modules/rollup/dist/es/shared/node-entry.js:15070:39)
+    at ReturnValueScope.findVariable (file:///c:/Users/snhyo/Downloads/new%20projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at FunctionBodyScope.findVariable (file:///c:/Users/snhyo/Downloads/new%20projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at MemberExpression.bind (file:///c:/Users/snhyo/Downloads/new%20projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/node_modules/rollup/dist/es/shared/node-entry.js:7392:49)
+    at Property.bind (file:///c:/Users/snhyo/Downloads/new%20projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/node_modules/rollup/dist/es/shared/node-entry.js:2829:23)
+    at ObjectExpression.bind (file:///c:/Users/snhyo/Downloads/new%20projects/Intelligent-automation-command-centre-main/Intelligent-automation-command-centre-main/FRONT_END/iacc/node_modules/rollup/dist/es/shared/node-entry.js:2825:28)
+

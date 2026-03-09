@@ -1,0 +1,50 @@
+Starting Auth Verification...
+
+--- Processing test41 ---
+Registering...
+Registration Status: 400
+Registration Response: Error: Username is already taken!
+Logging in...
+Login Status: 200
+Login Successful!
+Returned Username: test41
+Returned Roles: ['ROLE_DEPT_HEAD']
+Returned Dept: REVENUE
+Token present: Yes
+
+--- Processing staff41 ---
+Registering...
+Registration Status: 400
+Registration Response: Error: Username is already taken!
+Logging in...
+Login Status: 200
+Login Successful!
+Returned Username: staff41
+Returned Roles: ['ROLE_STAFF']
+Returned Dept: HEALTH
+Token present: Yes
+
+--- Processing auto41 ---
+Registering...
+Registration Status: 400
+Registration Response: Error: Username is already taken!
+Logging in...
+Login Status: 200
+Login Successful!
+Returned Username: auto41
+Returned Roles: ['ROLE_AUTO_SUPERVISOR']
+Returned Dept: TRANSPORT
+Token present: Yes
+
+--- Processing collector41 ---
+Registering...
+Registration Status: 400
+Registration Response: Error: Username is already taken!
+Logging in...
+Login Status: 200
+Login Successful!
+Returned Username: collector41
+Returned Roles: ['ROLE_COLLECTOR']
+Returned Dept: ADMIN
+Token present: Yes
+

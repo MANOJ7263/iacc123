@@ -1,0 +1,6 @@
+{
+  "Name": "IACC_Invoice_Generator",
+  "ProjectType": "Process",
+  "Description": "Dummy invoice generator for IACC Phase 1",
+  "MainFile": "Main.xaml"
+}

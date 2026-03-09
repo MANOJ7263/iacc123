@@ -1,0 +1,207 @@
+# ===================================
+# IACC Project - Comprehensive .gitignore
+# ===================================
+
+# ===================================
+# Java / Spring Boot / Maven
+# ===================================
+BACK_END/iacc/target/
+BACK_END/iacc/.mvn/
+BACK_END/iacc/mvnw
+BACK_END/iacc/mvnw.cmd
+*.class
+*.jar
+*.war
+*.ear
+*.log
+*.ctxt
+.mtj.tmp/
+hs_err_pid*
+replay_pid*
+
+# Maven
+**/target/
+**/pom.xml.tag
+**/pom.xml.releaseBackup
+**/pom.xml.versionsBackup
+**/pom.xml.next
+**/release.properties
+**/dependency-reduced-pom.xml
+**/buildNumber.properties
+**/.mvn/timing.properties
+**/.mvn/wrapper/maven-wrapper.jar
+
+# Spring Boot
+**/HELP.md
+**/.springBeans
+**/spring-boot-*.log
+
+# ===================================
+# Node.js / React / Frontend
+# ===================================
+FRONT_END/iacc/node_modules/
+FRONT_END/iacc/dist/
+FRONT_END/iacc/build/
+FRONT_END/iacc/.vite/
+FRONT_END/iacc/.next/
+FRONT_END/iacc/out/
+
+# Node.js
+**/node_modules/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/lerna-debug.log*
+**/.pnpm-debug.log*
+
+# Build outputs
+**/dist/
+**/build/
+**/.next/
+**/out/
+**/.nuxt/
+**/.cache/
+**/.parcel-cache/
+**/.vite/
+
+# Environment variables
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+**/.env.*.local
+
+# ===================================
+# Database
+# ===================================
+# H2 Database files
+**/*.db
+**/*.mv.db
+**/*.trace.db
+**/*.lock.db
+**/data/
+**/h2/
+
+# ===================================
+# IDEs and Editors
+# ===================================
+# IntelliJ IDEA
+**/.idea/
+**/*.iml
+**/*.iws
+**/*.ipr
+**/out/
+
+# Eclipse
+**/.classpath
+**/.project
+**/.settings/
+**/bin/
+
+# VS Code
+**/.vscode/
+**/*.code-workspace
+**/.history/
+
+# NetBeans
+**/nbproject/private/
+**/nbbuild/
+**/dist/
+**/nbdist/
+**/.nb-gradle/
+
+# ===================================
+# Operating System
+# ===================================
+# Windows
+**/Thumbs.db
+**/ehthumbs.db
+**/Desktop.ini
+**/$RECYCLE.BIN/
+**/*.lnk
+
+# macOS
+**/.DS_Store
+**/.AppleDouble
+**/.LSOverride
+**/._*
+
+# Linux
+**/*~
+**/.directory
+**/.Trash-*
+
+# ===================================
+# Logs and Temporary Files
+# ===================================
+**/logs/
+**/*.log
+**/temp/
+**/tmp/
+**/*.tmp
+**/*.temp
+**/*.swp
+**/*.swo
+**/*.bak
+**/*.backup
+
+# ===================================
+# Testing
+# ===================================
+**/coverage/
+**/.nyc_output/
+**/test-results/
+**/*.lcov
+
+# ===================================
+# Package Managers
+# ===================================
+# npm
+**/package-lock.json.bak
+**/.npm/
+
+# Yarn
+**/.yarn/cache/
+**/.yarn/unplugged/
+**/.yarn/build-state.yml
+**/.yarn/install-state.gz
+**/.pnp.*
+
+# pnpm
+**/pnpm-lock.yaml.bak
+
+# ===================================
+# Build Tools
+# ===================================
+**/.gradle/
+**/gradle-app.setting
+**/.gradletasknamecache
+
+# ===================================
+# Security & Sensitive Data
+# ===================================
+# API keys and secrets
+**/secrets/
+**/credentials/
+**/*.pem
+**/*.key
+**/*.cert
+**/*.p12
+**/*.jks
+**/*.keystore
+
+# ===================================
+# Antigravity / AI Assistant
+# ===================================
+**/.gemini/
+**/.agent/cache/
+
+# ===================================
+# Miscellaneous
+# ===================================
+**/.cache/
+**/.temp/
+**/.eslintcache
+**/.stylelintcache
+**/artifacts/

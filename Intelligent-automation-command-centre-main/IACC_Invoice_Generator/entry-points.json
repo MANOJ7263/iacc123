@@ -1,0 +1,40 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "entryPoints": [
+    {
+      "filePath": "Main.xaml",
+      "uniqueId": "807b6e31-a8c8-4c36-9194-0420fe0d5660",
+      "type": "process",
+      "input": {
+        "type": "object",
+        "properties": {
+          "inputPayload": {
+            "type": "string"
+          },
+          "assetPayload": {
+            "enum": [
+              "DBConnectionString",
+              "HttpConnectionString",
+              "Text",
+              "Bool",
+              "Integer",
+              "Credential",
+              "WindowsCredential",
+              "KeyValueList",
+              "Secret"
+            ]
+          }
+        },
+        "required": []
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "resultPayload": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}

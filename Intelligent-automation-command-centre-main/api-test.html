@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IACC API Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        h2 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success { border-left-color: #4caf50; color: #2e7d32; }
+        .error { border-left-color: #f44336; color: #c62828; }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .status.online { background: #4caf50; color: white; }
+        .status.offline { background: #f44336; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 IACC API Tester</h1>
+        
+        <div class="section">
+            <h2>1. Health Check</h2>
+            <button onclick="testHealth()">Test Backend Health</button>
+            <div id="healthResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>2. Register New User</h2>
+            <input type="text" id="regUsername" placeholder="Username" value="testuser">
+            <input type="password" id="regPassword" placeholder="Password" value="Test@123">
+            <input type="email" id="regEmail" placeholder="Email" value="testuser@district.gov.in">
+            <select id="regRole" style="width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #e0e0e0; border-radius: 8px;">
+                <option value="ADMIN">ADMIN</option>
+                <option value="STAFF">STAFF</option>
+            </select>
+            <button onclick="testRegister()">Register</button>
+            <div id="registerResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>3. Login</h2>
+            <input type="text" id="loginUsername" placeholder="Username" value="testadmin">
+            <input type="password" id="loginPassword" placeholder="Password" value="Admin@123">
+            <button onclick="testLogin()">Login</button>
+            <div id="loginResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>4. Get Tasks (Requires Login)</h2>
+            <button onclick="testGetTasks()">Fetch Tasks</button>
+            <div id="tasksResult" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081/api';
+        let authToken = null;
+
+        async function testHealth() {
+            const resultDiv = document.getElementById('healthResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.text();
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `<span class="status online">ONLINE</span><br>Response: ${data}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<span class="status offline">OFFLINE</span><br>Error: ${error.message}`;
+            }
+        }
+
+        async function testRegister() {
+            const resultDiv = document.getElementById('registerResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = 'Registering...';
+            
+            const body = {
+                username: document.getElementById('regUsername').value,
+                passwordHash: document.getElementById('regPassword').value,
+                email: document.getElementById('regEmail').value,
+                role: document.getElementById('regRole').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `<span class="status online">SUCCESS</span><br>${JSON.stringify(data, null, 2)}`;
+                } else {
+                    const error = await response.text();
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<span class="status offline">FAILED</span><br>${error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<span class="status offline">ERROR</span><br>${error.message}`;
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = 'Logging in...';
+            
+            const body = {
+                username: document.getElementById('loginUsername').value,
+                password: document.getElementById('loginPassword').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `<span class="status online">SUCCESS</span><br>Token: ${data.token.substring(0, 50)}...<br><br>Token saved for subsequent requests!`;
+                } else {
+                    const error = await response.text();
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<span class="status offline">FAILED</span><br>${error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<span class="status offline">ERROR</span><br>${error.message}`;
+            }
+        }
+
+        async function testGetTasks() {
+            const resultDiv = document.getElementById('tasksResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            
+            if (!authToken) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<span class="status offline">ERROR</span><br>Please login first!';
+                return;
+            }
+            
+            resultDiv.innerHTML = 'Fetching tasks...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/tasks`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `<span class="status online">SUCCESS</span><br>Tasks: ${JSON.stringify(data, null, 2)}`;
+                } else {
+                    const error = await response.text();
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<span class="status offline">FAILED</span><br>${error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<span class="status offline">ERROR</span><br>${error.message}`;
+            }
+        }
+
+        // Auto-test health on load
+        window.addEventListener('load', testHealth);
+    </script>
+</body>
+</html>

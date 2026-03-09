@@ -1,0 +1,25 @@
+{
+  "version": "2.0",
+  "resources": [
+    {
+      "activityDisplayName": "Get Asset",
+      "activityId": "GetRobotAsset_2",
+      "resource": "asset",
+      "key": "720822108036@hit.edu.in's workspace.IACC_TRIGGER_PAYLOAD",
+      "id": "asset720822108036@hit.edu.in's workspace.IACC_TRIGGER_PAYLOAD720822108036@hit.edu.in's workspaceFalseIACC_TRIGGER_PAYLOADFalse",
+      "value": {
+        "folderPath": {
+          "defaultValue": "720822108036@hit.edu.in's workspace",
+          "isExpression": false
+        },
+        "name": {
+          "defaultValue": "IACC_TRIGGER_PAYLOAD",
+          "isExpression": false
+        }
+      },
+      "metadata": {
+        "BindingsVersion": "2.2"
+      }
+    }
+  ]
+}

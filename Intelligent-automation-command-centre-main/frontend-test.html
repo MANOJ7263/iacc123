@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .status {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>IACC Frontend Status Check</h1>
+
+    <div class="info">
+        <h2>✅ Server Status</h2>
+        <p>The development server is running on: <strong>http://localhost:5173/</strong></p>
+        <p>HTTP Status Code: <strong>200 OK</strong></p>
+    </div>
+
+    <div class="success">
+        <h2>✅ Tailwind CSS Removed Successfully</h2>
+        <ul>
+            <li>All Tailwind dependencies removed from package.json</li>
+            <li>tailwind.config.js and postcss.config.js deleted</li>
+            <li>Vanilla CSS implementation in place</li>
+            <li>Custom cva() function created to replace class-variance-authority</li>
+            <li>UI components updated to use local imports</li>
+        </ul>
+    </div>
+
+    <div class="info">
+        <h2>📋 Changes Made</h2>
+        <ol>
+            <li><strong>index.css</strong>: Converted from Tailwind to vanilla CSS with CSS variables</li>
+            <li><strong>package.json</strong>: Removed Tailwind and related dependencies</li>
+            <li><strong>lib/utils.js</strong>: Simple className merger (no external deps)</li>
+            <li><strong>lib/cva.js</strong>: Custom variant helper function</li>
+            <li><strong>UI Components</strong>: Updated imports in button, badge, alert, label, and sheet components
+            </li>
+            <li><strong>ui-components.css</strong>: Comprehensive CSS for all UI components</li>
+        </ol>
+    </div>
+
+    <button onclick="testFrontend()">Test Frontend Loading</button>
+
+    <div id="result"></div>
+
+    <script>
+        async function testFrontend() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info"><p>Testing frontend...</p></div>';
+
+            try {
+                const response = await fetch('http://localhost:5173/');
+                const html = await response.text();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Frontend is Loading Successfully!</h3>
+                            <p>Status: ${response.status} ${response.statusText}</p>
+                            <p>The React application is being served correctly.</p>
+                            <p><strong>You can now open <a href="http://localhost:5173/" target="_blank">http://localhost:5173/</a> in your browser!</strong></p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Error Loading Frontend</h3>
+                            <p>Status: ${response.status} ${response.statusText}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-test on load
+        window.addEventListener('load', testFrontend);
+    </script>
+</body>
+
+</html>
