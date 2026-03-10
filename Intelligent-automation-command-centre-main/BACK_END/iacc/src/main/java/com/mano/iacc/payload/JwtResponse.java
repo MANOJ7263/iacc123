@@ -1,7 +1,5 @@
 package com.mano.iacc.payload;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import java.util.List;
 
 public class JwtResponse {

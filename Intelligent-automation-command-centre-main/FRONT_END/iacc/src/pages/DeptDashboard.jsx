@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { getDeptConfig, getRoleConfig } from '../config/departmentConfig';
 import { useTaskStore, computeDeptStats } from '../data/taskStore';
+import AutomationPage from './AutomationPage';
 
 // ─── Lazy-load Education role dashboards ────────────────────────────────────
 const CEODashboard = React.lazy(() => import('./education/CEODashboard'));
@@ -407,6 +408,55 @@ const DeptDashboard = () => {
     }
 
     // ── All other departments: generic dashboard ──────────────────────────────
+    if (subRoleUpper === 'AUTOMATION_SUPERVISOR' || subRoleUpper === 'AUTO_SUPERVISOR' || subRoleUpper === 'AUTOMATION') {
+        return (
+            <div className="dept-dashboard">
+                <aside className="dept-sidebar" style={{ '--dc': deptConfig.color, '--dg': deptConfig.gradient }}>
+                    <div className="sidebar-brand">
+                        <div className="sidebar-logo" style={{ background: deptConfig.gradient }}>
+                            <Bot size={22} color="#fff" />
+                        </div>
+                        <div className="sidebar-brand-text">
+                            <span className="sidebar-dept">{deptConfig.label.replace(' Department', '')}</span>
+                            <span className="sidebar-system">Auto Sup Portal</span>
+                        </div>
+                    </div>
+                    <div className="sidebar-role-pill">
+                        <ShieldCheck size={14} color={deptConfig.color} />
+                        <span>Supervisor</span>
+                    </div>
+                    <nav className="sidebar-nav">
+                        <button className="nav-item active">
+                            <Activity size={18} />
+                            <span>Bot Controls</span>
+                        </button>
+                    </nav>
+                    <div className="sidebar-footer">
+                        <button className="logout-btn" onClick={() => { localStorage.clear(); navigate('/login'); }}>
+                            <LogOut size={16} />
+                        </button>
+                    </div>
+                </aside>
+
+                <main className="dept-main" style={{ padding: '0', background: '#f8fafc', height: '100vh', overflowY: 'auto' }}>
+                    <header className="dept-topbar" style={{ background: '#fff', borderBottom: '1px solid #e2e8f0' }}>
+                        <div className="topbar-left">
+                            <div className="page-breadcrumb">
+                                <span className="breadcrumb-dept">{deptConfig.label}</span>
+                                <ChevronRight size={14} color="#94a3b8" />
+                                <span className="breadcrumb-role">Automation Supervisor</span>
+                            </div>
+                            <h1 className="page-title">Fleet Management</h1>
+                        </div>
+                    </header>
+                    <div style={{ padding: '2rem' }}>
+                        <AutomationPage dept={deptUpper} />
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
     return <GenericDeptDashboard dept={dept} subRole={subRole} deptConfig={deptConfig} roleConfig={roleConfig} />;
 };
 

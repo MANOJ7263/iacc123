@@ -2,7 +2,6 @@ package com.mano.iacc.service;
 
 import com.mano.iacc.entity.AuditLog;
 import com.mano.iacc.repository.AuditLogRepository;
-import com.mano.iacc.repository.AuditLogRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

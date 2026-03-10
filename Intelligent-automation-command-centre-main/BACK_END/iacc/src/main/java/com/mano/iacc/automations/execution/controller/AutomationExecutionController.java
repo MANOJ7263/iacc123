@@ -18,8 +18,7 @@ public class AutomationExecutionController {
     @PostMapping("/trigger")
     public ResponseEntity<AutomationExecution> trigger() {
 
-        AutomationExecution execution =
-                service.createAndTrigger("YOUR_UIPATH_PROCESS_NAME");
+        AutomationExecution execution = service.createAndTrigger("GENERIC_BOT");
 
         return ResponseEntity.ok(execution);
     }

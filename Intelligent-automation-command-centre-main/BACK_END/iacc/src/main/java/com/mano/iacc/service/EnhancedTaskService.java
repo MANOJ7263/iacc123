@@ -3,7 +3,7 @@ package com.mano.iacc.service;
 import com.mano.iacc.entity.AutomationJob;
 import com.mano.iacc.entity.Task;
 import com.mano.iacc.entity.User;
-import com.mano.iacc.integration.uipath.service.UiPathJobService;
+import com.mano.iacc.integration.automation.service.RobotFrameworkService;
 import com.mano.iacc.repository.AutomationJobRepository;
 import com.mano.iacc.repository.TaskRepository;
 import org.slf4j.Logger;
@@ -24,18 +24,18 @@ public class EnhancedTaskService {
 
     private final TaskRepository taskRepository;
     private final PredictiveEngineService predictiveEngine;
-    private final UiPathJobService uiPathService;
+    private final RobotFrameworkService automationService;
     private final AutomationJobRepository automationJobRepository;
     private final GovernanceAuditService auditService;
 
     public EnhancedTaskService(TaskRepository taskRepository,
             PredictiveEngineService predictiveEngine,
-            UiPathJobService uiPathService,
+            RobotFrameworkService automationService,
             AutomationJobRepository automationJobRepository,
             GovernanceAuditService auditService) {
         this.taskRepository = taskRepository;
         this.predictiveEngine = predictiveEngine;
-        this.uiPathService = uiPathService;
+        this.automationService = automationService;
         this.automationJobRepository = automationJobRepository;
         this.auditService = auditService;
     }
@@ -148,18 +148,17 @@ public class EnhancedTaskService {
 
     private void triggerAutomation(Task task, String triggeredBy) {
         try {
-            // Start Job via UiPath
-            String jobKey = uiPathService.startJob(task.getAssignedBotType());
+            // Start Job via Local Automation Engine (Robot Framework)
+            String jobKey = automationService.startJob(task.getAssignedBotType());
             task.setUipathJobKey(jobKey);
 
-            // Log Automation Job
             // Log Automation Job
             AutomationJob job = new AutomationJob();
             job.setTask(task);
             job.setBotId(jobKey);
             job.setStatus("RUNNING");
             job.setStartTime(LocalDateTime.now());
-            job.setLogs("Job initiated via UiPath Orchestrator for " + task.getAssignedBotType());
+            job.setLogs("Job initiated via Local Automation Engine for " + task.getAssignedBotType());
 
             automationJobRepository.save(job);
 
@@ -242,15 +241,33 @@ public class EnhancedTaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
-        String oldRisk = task.getRiskLevel();
+        String oldStatus = task.getStatus();
+
+        // Force intent to something automatable if it's currently manual
+        if (task.getAssignedBotType() == null || task.getAssignedBotType().equals("Manual_Queue")) {
+            detectIntent(task);
+            // If still null after intent detection (e.g. unrecognizable description), force
+            // a generic bot
+            if (task.getAssignedBotType() == null) {
+                task.setAssignedBotType("RECOVERY_BOT");
+            }
+        }
+
         task.setRiskLevel("HIGH");
         task.setStatus("ESCALATED");
         task.setPriority("HIGH");
         task.setRisk_reason("Manual Escalation by Collector");
 
-        auditService.logTaskStatusChange(task.getId(), task.getStatus(), "ESCALATED", username, "Manual Escalation");
+        auditService.logTaskStatusChange(task.getId(), oldStatus, "ESCALATED", username,
+                "Manual Escalation & Forced Automation");
 
-        return taskRepository.save(task);
+        // Save state before triggering
+        Task savedTask = taskRepository.save(task);
+
+        // Actually force the automation engine to run this task
+        triggerAutomation(savedTask, username);
+
+        return savedTask;
     }
 
     public List<Task> getMyTasks(Long userId) {
@@ -274,7 +291,8 @@ public class EnhancedTaskService {
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
         if ("FAILED".equals(task.getStatus()) || "Start Failed".equals(task.getUipathJobStatus())
-                || "Faulted".equalsIgnoreCase(task.getUipathJobStatus())) {
+                || "Faulted".equalsIgnoreCase(task.getUipathJobStatus())
+                || "FAILED".equalsIgnoreCase(task.getUipathJobStatus())) {
             log.info("Retrying task: {} by user: {}", taskId, username);
             triggerAutomation(task, username);
         } else {

@@ -5,14 +5,26 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { taskService } from '@/services/api';
 
-const AutomationPage = () => {
-    const [bots, setBots] = useState([
-        { id: 'BOT-001', name: 'Invoice Processor', status: 'running', uptime: '99.8%', tasks: 1240, type: 'Financial' },
-        { id: 'BOT-002', name: 'Email Classifier', status: 'running', uptime: '99.9%', tasks: 850, type: 'Communication' },
-        { id: 'BOT-003', name: 'Data Validator', status: 'paused', uptime: '95.5%', tasks: 420, type: 'Data Quality' },
-        { id: 'BOT-004', name: 'Compliance Checker', status: 'error', uptime: '92.1%', tasks: 115, type: 'Audit' },
-        { id: 'BOT-005', name: 'Report Generator', status: 'idle', uptime: '98.2%', tasks: 300, type: 'Reporting' },
-    ]);
+const AutomationPage = ({ dept }) => {
+    // Generate department-specific mock bots if a dept is provided
+    const getInitialBots = () => {
+        const baseBots = [
+            { id: 'BOT-001', name: 'Invoice Processor', status: 'running', uptime: '99.8%', tasks: 1240, type: 'Financial', deptMatch: 'FINANCE' },
+            { id: 'BOT-002', name: 'Email Classifier', status: 'running', uptime: '99.9%', tasks: 850, type: 'Communication', deptMatch: 'ALL' },
+            { id: 'BOT-003', name: 'Data Validator', status: 'paused', uptime: '95.5%', tasks: 420, type: 'Data Quality', deptMatch: 'ALL' },
+            { id: 'BOT-004', name: 'Compliance Checker', status: 'error', uptime: '92.1%', tasks: 115, type: 'Audit', deptMatch: 'REVENUE' },
+            { id: 'BOT-005', name: 'Report Generator', status: 'idle', uptime: '98.2%', tasks: 300, type: 'Reporting', deptMatch: 'ALL' },
+            { id: 'BOT-006', name: 'Patient Vitals Sync', status: 'running', uptime: '99.5%', tasks: 2450, type: 'Health', deptMatch: 'HEALTH' },
+            { id: 'BOT-007', name: 'Student Roster Update', status: 'idle', uptime: '99.0%', tasks: 150, type: 'Education', deptMatch: 'EDUCATION' },
+            { id: 'BOT-008', name: 'Fleet Tracker', status: 'running', uptime: '97.4%', tasks: 890, type: 'Transport', deptMatch: 'TRANSPORT' },
+        ];
+
+        if (!dept) return baseBots.filter(b => b.deptMatch === 'ALL' || b.deptMatch === 'FINANCE' || b.deptMatch === 'REVENUE'); // Default global view
+
+        return baseBots.filter(b => b.deptMatch === 'ALL' || b.deptMatch === dept.toUpperCase());
+    };
+
+    const [bots, setBots] = useState(getInitialBots());
 
     const [failedTasks, setFailedTasks] = useState([]);
 
@@ -20,13 +32,18 @@ const AutomationPage = () => {
         const fetchFailed = async () => {
             try {
                 const all = await taskService.getAllTasks();
-                setFailedTasks(all.filter(t => t.status === 'FAILED' || t.status === 'REJECTED'));
+                // If in a dept dashboard, only show failures for this dept
+                let filtered = all.filter(t => t.status === 'FAILED' || t.status === 'REJECTED');
+                if (dept) {
+                    filtered = filtered.filter(t => t.department === dept.toUpperCase());
+                }
+                setFailedTasks(filtered);
             } catch (e) {
                 console.error(e);
             }
         };
         fetchFailed();
-    }, []);
+    }, [dept]);
 
     const toggleBot = (id) => {
         setBots(bots.map(b => {
@@ -56,9 +73,11 @@ const AutomationPage = () => {
     return (
         <div className="space-y-8 p-1 animate-in fade-in duration-700">
             <div className="flex flex-col gap-2">
-                <h2 className="text-responsive-xl text-gradient tracking-tight">Automation Supervisor</h2>
+                <h2 className="text-responsive-xl text-gradient tracking-tight">
+                    {dept ? `${dept.charAt(0).toUpperCase() + dept.slice(1).toLowerCase()} Automation Supervisor` : 'Global Automation Supervisor'}
+                </h2>
                 <p className="text-muted-foreground text-lg max-w-2xl">
-                    Manage and monitor your fleet of intelligent automation bots.
+                    Manage and monitor {dept ? 'your department\'s' : 'your fleet of'} intelligent automation bots.
                 </p>
             </div>
 
@@ -164,25 +183,25 @@ const AutomationPage = () => {
                 </div>
 
                 <div>
-                    <Card className="card-enhanced bg-slate-900 text-white border-0">
+                    <Card className="card-enhanced border-0 shadow-sm bg-white">
                         <CardHeader>
-                            <CardTitle className="text-slate-100">Quick Actions</CardTitle>
+                            <CardTitle className="text-slate-800">Quick Actions</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <Button className="w-full justify-start gap-3 bg-slate-800 hover:bg-slate-700 text-slate-300">
+                            <Button variant="outline" className="w-full justify-start gap-3 hover:bg-indigo-50 hover:text-indigo-600 border-slate-200">
                                 <History className="h-4 w-4" /> View Full History
                             </Button>
-                            <Button className="w-full justify-start gap-3 bg-slate-800 hover:bg-slate-700 text-slate-300">
+                            <Button variant="outline" className="w-full justify-start gap-3 hover:bg-indigo-50 hover:text-indigo-600 border-slate-200">
                                 <Settings className="h-4 w-4" /> Bot Configuration
                             </Button>
-                            <div className="pt-4 border-t border-slate-700">
+                            <div className="pt-4 border-t border-slate-100">
                                 <p className="text-xs text-slate-500 uppercase font-bold mb-3">System Status</p>
-                                <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
+                                <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
                                     <span className="relative flex h-3 w-3">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                         <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                                     </span>
-                                    All Orchestrators Online
+                                    Local Engine Active
                                 </div>
                             </div>
                         </CardContent>

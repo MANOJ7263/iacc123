@@ -2,7 +2,7 @@ package com.mano.iacc.service;
 
 import com.mano.iacc.entity.AutomationJob;
 import com.mano.iacc.entity.Task;
-import com.mano.iacc.integration.uipath.service.UiPathJobService;
+import com.mano.iacc.integration.automation.service.RobotFrameworkService;
 import com.mano.iacc.repository.AutomationJobRepository;
 import com.mano.iacc.repository.TaskRepository;
 import org.springframework.stereotype.Service;
@@ -16,16 +16,16 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final PredictiveEngineService predictiveEngine;
-    private final UiPathJobService uiPathService;
+    private final RobotFrameworkService robotFrameworkService;
     private final AutomationJobRepository automationJobRepository;
 
     public TaskService(TaskRepository taskRepository,
             PredictiveEngineService predictiveEngine,
-            UiPathJobService uiPathService,
+            RobotFrameworkService robotFrameworkService,
             AutomationJobRepository automationJobRepository) {
         this.taskRepository = taskRepository;
         this.predictiveEngine = predictiveEngine;
-        this.uiPathService = uiPathService;
+        this.robotFrameworkService = robotFrameworkService;
         this.automationJobRepository = automationJobRepository;
     }
 
@@ -66,17 +66,16 @@ public class TaskService {
 
     private void triggerAutomation(Task task) {
         try {
-            // Start Job
-            String jobKey = uiPathService.startJob(task.getAssignedBotType());
+            // Start Job via Robot Framework local engine
+            String jobKey = robotFrameworkService.startJob(task.getAssignedBotType());
 
-            // Log Job
             // Log Job
             AutomationJob job = new AutomationJob();
             job.setTask(task);
             job.setBotId(jobKey);
             job.setStatus("PENDING");
             job.setStartTime(LocalDateTime.now());
-            job.setLogs("Job initiated via UiPath Orchestrator");
+            job.setLogs("Job initiated via Local Robot Framework Engine");
 
             automationJobRepository.save(job);
 
@@ -111,10 +110,6 @@ public class TaskService {
         } else {
             task.setStatus("REJECTED");
         }
-
-        // You might want to store approval details in AuditLog or Task fields
-        // task.setApprovedBy(username);
-        // task.setRejectionReason(reason);
 
         return taskRepository.save(task);
     }

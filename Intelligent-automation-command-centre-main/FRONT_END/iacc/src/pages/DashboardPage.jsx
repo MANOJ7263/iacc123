@@ -3,7 +3,7 @@ import { taskService } from '@/services/api';
 import {
     Activity, Clock, CheckCircle, AlertTriangle, Terminal,
     TrendingUp, Zap, Shield, Download, X, Layers, User,
-    BarChart2, ArrowUpRight, ArrowDownRight
+    BarChart2, ArrowUpRight, ArrowDownRight, Server, Play, Webhook
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -193,9 +193,14 @@ const ProductivityChart = () => (
 );
 
 // ─── High-Risk Escalation ───────────────────────────────────────────────────────
-const HighRiskEscalation = ({ tasks, onEscalate }) => {
-    const highRisk = tasks.filter(t => t.riskLevel === 'HIGH' && t.status !== 'COMPLETED');
-    if (highRisk.length === 0) return null;
+const HighRiskEscalation = ({ tasks, onEscalate, escalating = {} }) => {
+    const highRisk = tasks.filter(t => t.riskLevel === 'HIGH' && t.status !== 'COMPLETED' && t.status !== 'ESCALATED');
+    if (highRisk.length === 0) return (
+        <div style={{ marginTop: '1.5rem', background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '1rem', padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <CheckCircle size={20} color="#16a34a" />
+            <span style={{ fontWeight: 600, color: '#15803d' }}>No high-risk tasks requiring escalation right now.</span>
+        </div>
+    );
     return (
         <div style={{ marginTop: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
@@ -204,17 +209,33 @@ const HighRiskEscalation = ({ tasks, onEscalate }) => {
                 <span style={{ background: '#fee2e2', color: '#dc2626', fontWeight: 700, fontSize: '0.75rem', padding: '0.1rem 0.5rem', borderRadius: '99px' }}>{highRisk.length}</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.875rem' }}>
-                {highRisk.slice(0, 6).map(task => (
-                    <div key={task.id} style={{ background: '#fff5f5', border: '1.5px solid #fecaca', borderRadius: '0.875rem', padding: '1rem' }}>
-                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#991b1b', marginBottom: '0.35rem' }}>{task.title}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#dc2626', marginBottom: '0.75rem' }}>{task.department}</div>
-                        <p style={{ fontSize: '0.75rem', color: '#b91c1c', marginBottom: '0.875rem', lineHeight: 1.4 }}>{task.description}</p>
-                        <button
-                            onClick={() => onEscalate(task.id)}
-                            style={{ width: '100%', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '0.5rem', padding: '0.5rem', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}
-                        >🚨 Escalate & Force Automation</button>
-                    </div>
-                ))}
+                {highRisk.slice(0, 6).map(task => {
+                    const state = escalating[task.id]; // 'loading' | 'done' | undefined
+                    return (
+                        <div key={task.id} style={{ background: state === 'done' ? '#f0fdf4' : '#fff5f5', border: `1.5px solid ${state === 'done' ? '#bbf7d0' : '#fecaca'}`, borderRadius: '0.875rem', padding: '1rem', transition: 'all 0.3s' }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#991b1b', marginBottom: '0.35rem' }}>{task.title}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#dc2626', marginBottom: '0.75rem' }}>{task.department}</div>
+                            <p style={{ fontSize: '0.75rem', color: '#b91c1c', marginBottom: '0.875rem', lineHeight: 1.4 }}>{task.description}</p>
+                            <button
+                                onClick={() => state !== 'loading' && state !== 'done' && onEscalate(task.id)}
+                                disabled={state === 'loading' || state === 'done'}
+                                style={{
+                                    width: '100%',
+                                    background: state === 'done' ? '#16a34a' : state === 'loading' ? '#9f1239' : '#dc2626',
+                                    color: '#fff', border: 'none', borderRadius: '0.5rem',
+                                    padding: '0.55rem', fontSize: '0.8rem', fontWeight: 700,
+                                    cursor: state ? 'not-allowed' : 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                    transition: 'background 0.3s',
+                                    opacity: state === 'loading' ? 0.85 : 1,
+                                }}
+                            >
+                                {state === 'loading' && <span style={{ display: 'inline-block', width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />}
+                                {state === 'done' ? '✅ Escalated & Bot Running' : state === 'loading' ? 'Triggering Bot...' : '🚨 Escalate & Force Automation'}
+                            </button>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
@@ -248,8 +269,8 @@ const AutomationMonitor = () => {
     const displayJobs = jobs.length > 0 ? jobs : mockJobs;
 
     const statusColor = (s) =>
-        s === 'Successful' ? { bg: '#f0fdf4', border: '#bbf7d0', dot: '#22c55e', text: '#15803d' } :
-            ['Faulted', 'Start Failed', 'FAILED'].includes(s) ? { bg: '#fff5f5', border: '#fecaca', dot: '#ef4444', text: '#dc2626' } :
+        s === 'COMPLETED' ? { bg: '#f0fdf4', border: '#bbf7d0', dot: '#22c55e', text: '#15803d' } :
+            ['FAILED'].includes(s) ? { bg: '#fff5f5', border: '#fecaca', dot: '#ef4444', text: '#dc2626' } :
                 { bg: '#eff6ff', border: '#bfdbfe', dot: '#3b82f6', text: '#1d4ed8' };
 
     return (
@@ -258,7 +279,7 @@ const AutomationMonitor = () => {
                 <Terminal size={18} color="#6366f1" />
                 <div>
                     <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1e293b' }}>Live Automation Monitor</div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Real-time UiPath Orchestrator Feed</div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Real-time Local Bot Engine Feed</div>
                 </div>
             </div>
             <div style={{ padding: '1rem 1.25rem', maxHeight: '340px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
@@ -268,11 +289,11 @@ const AutomationMonitor = () => {
                         <div key={job.id} style={{ background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: '0.75rem', padding: '0.75rem 0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <div style={{ flex: 1 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: sc.dot, flexShrink: 0, animation: job.uipathJobStatus === 'Running' ? 'pulse 1.5s infinite' : 'none' }} />
+                                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: sc.dot, flexShrink: 0, animation: job.uipathJobStatus === 'RUNNING' ? 'pulse 1.5s infinite' : 'none' }} />
                                     <span style={{ fontWeight: 700, fontSize: '0.78rem', color: '#334155', fontFamily: 'monospace' }}>{job.assignedBotType || 'Bot'}</span>
                                 </div>
                                 <div style={{ fontSize: '0.75rem', color: '#475569', marginBottom: '0.2rem' }}>{job.title}</div>
-                                <div style={{ fontSize: '0.68rem', color: sc.text, fontWeight: 600 }}>● {job.uipathJobStatus || 'Pending'}</div>
+                                <div style={{ fontSize: '0.68rem', color: sc.text, fontWeight: 600 }}>● {job.uipathJobStatus || 'PENDING'}</div>
                             </div>
                             <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontFamily: 'monospace', flexShrink: 0, marginLeft: '0.5rem' }}>
                                 {new Date(job.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -285,9 +306,82 @@ const AutomationMonitor = () => {
     );
 };
 
+// ─── System Console Modal (Robot Framework Control) ───────────────────────────
+const SystemConsoleModal = ({ onClose }) => {
+    return (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1.25rem', width: '90%', maxWidth: '600px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+
+                {/* Header */}
+                <div style={{ padding: '1.25rem 1.5rem', background: '#0f172a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <Terminal size={20} color="#38bdf8" />
+                        <div>
+                            <div style={{ color: '#fff', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.02em' }}>IACC System Console</div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Local Automation Engine (Robot Framework)</div>
+                        </div>
+                    </div>
+                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: '2rem', height: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#cbd5e1' }}>
+                        <X size={16} />
+                    </button>
+                </div>
+
+                {/* Body */}
+                <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+                    {/* Server Status Box */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.75rem', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ background: '#e0f2fe', padding: '0.5rem', borderRadius: '0.5rem' }}>
+                                <Server size={18} color="#0284c7" />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>Automation Core HTTP API</div>
+                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>http://localhost:5000</div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#dcfce7', color: '#15803d', padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600 }}>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} /> ONLINE
+                        </div>
+                    </div>
+
+                    {/* Sync Status Box */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.75rem', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ background: '#ede9fe', padding: '0.5rem', borderRadius: '0.5rem' }}>
+                                <Webhook size={18} color="#7c3aed" />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>Spring Boot Sync Polling</div>
+                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Checks for running routines every 10s</div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#dcfce7', color: '#15803d', padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600 }}>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s infinite' }} /> ACTIVE
+                        </div>
+                    </div>
+
+                    <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5, borderLeft: '3px solid #cbd5e1', paddingLeft: '0.75rem', margin: 0 }}>
+                        The command center is currently linked to the Python-based Robot Framework orchestrator. All high-risk and automated department tasks are routed locally.
+                    </p>
+
+                </div>
+
+            </div>
+        </div>
+    );
+};
+
 // ─── Main Dashboard ─────────────────────────────────────────────────────────────
 const DashboardPage = () => {
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [escalating, setEscalating] = useState({});   // { taskId: 'loading' | 'done' | 'error' }
+    const [toast, setToast] = useState(null);             // { msg, type }
+    const [showConsole, setShowConsole] = useState(false);
+
+    const showToast = (msg, type = 'success') => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3500);
+    };
 
     // ── Read from shared task store (same data as department pages) ─────────────
     const { tasks: allTasks, initialized, loading, initialize, escalateTask: storeEscalate } = useTaskStore();
@@ -297,10 +391,23 @@ const DashboardPage = () => {
     // Live per-department stats — drives both bar chart AND stat cards
     const deptStats = computeDeptStats(allTasks);
 
+    const [selectedCategory, setSelectedCategory] = useState(null);
+
     const handleEscalate = async (id) => {
-        try { await taskService.escalateTask(id); } catch (_) { }
-        storeEscalate(id); // update shared store → dept pages update too
+        setEscalating(prev => ({ ...prev, [id]: 'loading' }));
+        try {
+            await taskService.escalateTask(id);
+            storeEscalate(id);   // update shared store so dept pages reflect change too
+            setEscalating(prev => ({ ...prev, [id]: 'done' }));
+            showToast(`✅ Task #${id} escalated & bot triggered!`, 'success');
+        } catch (err) {
+            // Backend offline — still update local UI
+            storeEscalate(id);
+            setEscalating(prev => ({ ...prev, [id]: 'done' }));
+            showToast(`⚠️ Task #${id} escalated locally (backend offline)`, 'warn');
+        }
     };
+
 
     const handleExport = async () => {
         try { await taskService.downloadReport(); } catch (_) {
@@ -343,11 +450,28 @@ const DashboardPage = () => {
                     <button onClick={handleExport} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '0.625rem', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', color: '#475569' }}>
                         <Download size={15} /> Export Report
                     </button>
-                    <button style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', background: '#0f172a', border: 'none', borderRadius: '0.625rem', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', color: '#fff' }}>
+                    <button onClick={() => setShowConsole(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', background: '#0f172a', border: 'none', borderRadius: '0.625rem', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', color: '#fff' }}>
                         <Terminal size={15} /> System Console
                     </button>
                 </div>
             </div>
+
+            {/* Toast Notification */}
+            {toast && (
+                <div style={{
+                    position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 9999,
+                    background: toast.type === 'success' ? '#16a34a' : '#d97706',
+                    color: '#fff', padding: '0.875rem 1.25rem', borderRadius: '0.75rem',
+                    fontSize: '0.875rem', fontWeight: 600, boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                    display: 'flex', alignItems: 'center', gap: '0.5rem', animation: 'fadeIn 0.3s ease',
+                    maxWidth: '340px',
+                }}>
+                    {toast.msg}
+                </div>
+            )}
+
+            {/* System Console Modal */}
+            {showConsole && <SystemConsoleModal onClose={() => setShowConsole(false)} />}
 
             {/* Stat Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -371,7 +495,7 @@ const DashboardPage = () => {
             )}
 
             {/* High Risk Escalations */}
-            <HighRiskEscalation tasks={allTasks} onEscalate={handleEscalate} />
+            <HighRiskEscalation tasks={allTasks} onEscalate={handleEscalate} escalating={escalating} />
 
             {/* Charts Row */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginTop: '1.5rem' }}>

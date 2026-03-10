@@ -64,12 +64,11 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/test/**", "/api/health", "/h2-console/**").permitAll() // Added
-                                                                                                                      // h2-console
+                        .requestMatchers("/api/auth/**", "/api/test/**", "/api/health", "/h2-console/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/**",
-                                "/api/automations/**", "/api/integrations/uipath/**")
+                                "/api/automations/**", "/api/executions/**")
                         .hasRole("ADMIN")
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/integrations/uipath/trigger")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/executions/trigger")
                         .hasRole("ADMIN")
                         .anyRequest().authenticated());
 
